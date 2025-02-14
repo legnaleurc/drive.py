@@ -1,4 +1,4 @@
-from concurrent.futures import ProcessPoolExecutor, Executor
+from concurrent.futures import Executor, ProcessPoolExecutor
 from logging.config import dictConfig
 from pathlib import Path
 from shutil import rmtree
@@ -9,9 +9,9 @@ from wcpan.logging import ConfigBuilder
 
 from app.lib import create_default_drive
 
+from ._archive import archive
 from ._arg import parse_args
 from ._download import download
-from ._archive import archive
 from ._upload import upload
 
 

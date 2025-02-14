@@ -1,10 +1,10 @@
 from concurrent.futures import Executor
 from pathlib import Path
 
-from wcpan.queue import AioQueue
+from wcpan.drive.cli.lib import get_file_hash
 from wcpan.drive.core.lib import download_file_to_local
 from wcpan.drive.core.types import Drive, Node
-from wcpan.drive.cli.lib import get_file_hash
+from wcpan.queue import AioQueue
 
 
 async def download(drive: Drive, src: Node, dst: Path, pool: Executor) -> Path:

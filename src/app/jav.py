@@ -1,14 +1,14 @@
-from argparse import ArgumentParser, Namespace
-from collections.abc import Callable, Awaitable, AsyncIterator
-from pathlib import Path
-from typing import Sequence, TypedDict
 import asyncio
 import sys
+from argparse import ArgumentParser, Namespace
+from collections.abc import AsyncIterator, Awaitable, Callable
+from pathlib import Path
+from typing import Sequence, TypedDict
 
 import yaml
 from wcpan.drive.core.types import Drive, Node
-from wcpan.logging import ConfigBuilder
 from wcpan.jav import generate_detailed_products
+from wcpan.logging import ConfigBuilder
 
 from app.lib import create_default_drive
 

@@ -4,11 +4,11 @@ from concurrent.futures import Executor
 from contextlib import AsyncExitStack
 from logging import getLogger
 from logging.config import dictConfig
-from pathlib import PurePath, Path
+from pathlib import Path, PurePath
 from tempfile import TemporaryDirectory
 
-from wcpan.drive.core.types import Node, Drive
 from wcpan.drive.cli.lib import create_executor
+from wcpan.drive.core.types import Drive, Node
 from wcpan.logging import ConfigBuilder
 from wcpan.queue import AioQueue
 

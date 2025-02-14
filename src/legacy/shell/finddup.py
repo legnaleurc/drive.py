@@ -4,27 +4,29 @@ import asyncio
 import sys
 
 import yaml
-
 from wcpan.drive.core.drive import DriveFactory
-from wcpan.logger import setup as setup_logger, INFO
+from wcpan.logger import INFO
+from wcpan.logger import setup as setup_logger
 
 
 async def main():
-    setup_logger((
-        'wcpan.drive',
-        'finddup',
-    ))
+    setup_logger(
+        (
+            "wcpan.drive",
+            "finddup",
+        )
+    )
 
     from_path = sys.argv[1]
 
     factory = DriveFactory()
-    factory.database = 'nodes.sqlite'
-    factory.driver = 'wcpan.drive.google'
-    factory.middleware_list.append('wcpan.drive.crypt')
+    factory.database = "nodes.sqlite"
+    factory.driver = "wcpan.drive.google"
+    factory.middleware_list.append("wcpan.drive.crypt")
 
     async with factory() as drive:
         async for change in drive.sync():
-            INFO('finddup') << change
+            INFO("finddup") << change
 
         root_node = await drive.get_node_by_path(from_path)
         dup_list = []
@@ -32,8 +34,14 @@ async def main():
             await purge_folder(dup_list, drive, folders)
             await purge_file(dup_list, drive, files)
 
-    with open('/tmp/x.yaml', 'wb') as fout:
-        yaml.safe_dump(dup_list, stream=fout, default_flow_style=False, encoding='utf-8', allow_unicode=True)
+    with open("/tmp/x.yaml", "wb") as fout:
+        yaml.safe_dump(
+            dup_list,
+            stream=fout,
+            default_flow_style=False,
+            encoding="utf-8",
+            allow_unicode=True,
+        )
 
 
 async def purge_folder(rv, drive, folder_list):
@@ -62,6 +70,5 @@ async def purge_file(rv, drive, file_list):
             rv.append([node.to_dict() for node in node_list])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(asyncio.run(main()))
-

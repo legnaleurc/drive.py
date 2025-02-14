@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from ._types import MediaDescriptor, AudioStream
+from ._types import AudioStream, MediaDescriptor
 
 
 H264_PRESET = "veryslow"

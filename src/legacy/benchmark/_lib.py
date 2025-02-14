@@ -1,7 +1,7 @@
 import random
 import string
 from contextlib import contextmanager
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
 

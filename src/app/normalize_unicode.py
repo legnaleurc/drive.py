@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
 import asyncio
-import unicodedata
 import sys
+import unicodedata
 
 from ..lib import create_default_drive
 
