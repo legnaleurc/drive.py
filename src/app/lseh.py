@@ -4,7 +4,7 @@ import sys
 from argparse import ArgumentParser
 from pathlib import Path
 
-from ..lib import create_default_drive
+from .lib import create_default_drive
 
 
 async def main(args: list[str]) -> int:
