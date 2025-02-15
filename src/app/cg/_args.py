@@ -4,7 +4,7 @@ from pathlib import PurePath
 from typing import Literal
 
 from ._analyze import analyze, debug
-from ._generate import generate
+from ._apply import apply
 
 
 type Action = Callable[[], Awaitable[None]]
@@ -15,16 +15,16 @@ def parse_args(args: list[str]) -> Action:
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     analyze_parser = subparsers.add_parser("analyze", help="Analyze a given path")
-    analyze_parser.add_argument("path", help="Path to analyze")
+    analyze_parser.add_argument("path", required=True, help="Path to analyze")
 
-    generate_parser = subparsers.add_parser(
-        "generate", help="Generate script to stdout from stdin"
+    apply_parser = subparsers.add_parser(
+        "apply", help="Apply sheet to stdout from stdin"
     )
-    generate_parser.add_argument("--comic", help="Path to comic", required=True)
-    generate_parser.add_argument("--original", help="Path to original", required=True)
+    apply_parser.add_argument("--comic", required=True, help="Path to comic")
+    apply_parser.add_argument("--original", required=True, help="Path to original")
 
     debug_parser = subparsers.add_parser("debug", help="Debug name")
-    debug_parser.add_argument("name", help="File name")
+    debug_parser.add_argument("name", required=True, help="File name")
 
     kwargs = parser.parse_args(args)
     command: Literal["analyze", "generate", "debug"] = kwargs.command
@@ -32,7 +32,7 @@ def parse_args(args: list[str]) -> Action:
         case "analyze":
             return lambda: analyze(PurePath(kwargs.path))
         case "generate":
-            return lambda: generate(
+            return lambda: apply(
                 comic_path=PurePath(kwargs.comic),
                 original_path=PurePath(kwargs.original),
             )
