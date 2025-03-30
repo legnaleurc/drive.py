@@ -1,5 +1,6 @@
 version = 1
-requires-python = ">=3.12"
+revision = 1
+requires-python = ">=3.12, <=4.0"
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -109,13 +110,13 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "python-magic", specifier = ">=0.4.27" },
-    { name = "wcpan-drive-cli", specifier = ">=3.5.0" },
-    { name = "wcpan-drive-crypt", specifier = ">=4.1.1" },
-    { name = "wcpan-drive-google", specifier = ">=9.1.7" },
-    { name = "wcpan-drive-sqlite", specifier = ">=2.1.0" },
-    { name = "wcpan-jav", specifier = ">=0.2.0" },
-    { name = "wcpan-logging", specifier = ">=2.1.0" },
+    { name = "python-magic", specifier = ">=0.4.27,<0.5.0" },
+    { name = "wcpan-drive-cli", specifier = ">=3.5.0,<4.0.0" },
+    { name = "wcpan-drive-crypt", specifier = ">=4.1.1,<5.0.0" },
+    { name = "wcpan-drive-google", specifier = ">=9.1.7,<10.0.0" },
+    { name = "wcpan-drive-sqlite", specifier = ">=2.1.0,<3.0.0" },
+    { name = "wcpan-jav", specifier = ">=0.2.2,<0.3.0" },
+    { name = "wcpan-logging", specifier = ">=2.1.0,<3.0.0" },
 ]
 
 [[package]]
@@ -411,15 +412,15 @@ wheels = [
 
 [[package]]
 name = "wcpan-jav"
-version = "0.2.0"
+version = "0.2.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "beautifulsoup4" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/33/9a/6a3e180d77fd19fd72490c9650c6504c32dbd630be2ef6efc23ff5f5986d/wcpan_jav-0.2.0.tar.gz", hash = "sha256:7e99057c3a77f1a5b2833da2fe40ec7c78a4c17753538c10b5ce24cda4447515", size = 24164 }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/72/4e7b5be73091f5943a7424bb95fd74088ea1d7b76d80539f02815eed80df/wcpan_jav-0.2.2.tar.gz", hash = "sha256:23ce61234507e6b75ffb25449ef2f5b4a3d489c10e0d1e496f652d45dd743c70", size = 24161 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/56/b5/104f2937d0996d23a18d027f6fb3ded5ec3f229fb44c736e8a16720630c5/wcpan_jav-0.2.0-py3-none-any.whl", hash = "sha256:909f45c5ffce364b5917b166ae04f97560eb9e1beb00265b364e166d8c41af87", size = 14721 },
+    { url = "https://files.pythonhosted.org/packages/3a/30/7653df72f4d595fe43f753cd62f7dfd28ab863754a9d2dac15c76186ab70/wcpan_jav-0.2.2-py3-none-any.whl", hash = "sha256:ae9f9f4ddb8ecde65df378843fe01ff4174f21393ec7d24292cf9354dea20cdc", size = 14718 },
 ]
 
 [[package]]
