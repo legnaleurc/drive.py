@@ -33,7 +33,7 @@ test: venv
 venv: $(ENV_LOCK)
 
 $(ENV_LOCK): $(PKG_LOCK)
-	uv sync --frozen
+	uv sync
 	touch $@
 
 $(PKG_LOCK): $(PKG_FILES)
