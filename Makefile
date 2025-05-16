@@ -1,6 +1,6 @@
 RM := rm -rf
 PYTHON := uv run
-RUFF := uvx ruff
+RUFF := $(PYTHON) ruff
 
 PKG_FILES := pyproject.toml hatch.toml
 PKG_LOCK := uv.lock
