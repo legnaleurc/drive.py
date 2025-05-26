@@ -61,18 +61,13 @@ class VideoProcessor(object):
             ac = ["-c:a", "copy"]
         else:
             ac = []
-        if self.is_movtext:
-            sc = ["-c:s", "copy"]
-        else:
-            sc = ["-c:s", "mov_text"]
-        dc = ["-c:d", "copy"]
         # muxer options
         fast_start = ["-movflags", MP4_FLAGS]
         # keeps subtitles if possible
         all_streams = ["-map", "0"]
         # increase frame queue to fix corrupted frames
         frame_queue = ["-max_muxing_queue_size", "1024"]
-        return fast_start + ac + vc + sc + dc + all_streams + frame_queue
+        return fast_start + ac + vc + all_streams + frame_queue
 
     @property
     def output_folder(self) -> Path:
