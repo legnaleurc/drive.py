@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.12,<4.0"
 dependencies = [
+    "pymediainfo>=7.0.1,<8.0.0",
     "python-magic>=0.4.27,<0.5.0",
     "wcpan-drive-cli>=3.7.3,<4.0.0",
     "wcpan-drive-crypt>=4.1.1,<5.0.0",
