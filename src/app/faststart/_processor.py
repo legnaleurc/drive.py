@@ -17,7 +17,7 @@ from app.lib import get_daily_usage
 from ._cache import has_cache, is_migrated, need_transcode, set_cache, unset_cache
 
 
-VIDEO_CODEC_SET = {"h264", "hevc"}
+VIDEO_CODEC_SET = {"AVC", "HEVC"}
 H264_PRESET = "veryslow"
 H264_CRF = "18"
 MP4_FLAGS = "+faststart"
@@ -87,7 +87,24 @@ class VideoProcessor(object):
     def transcoded_file_path(self) -> Path:
         return self.output_folder / self.transcoded_file_name
 
-    async def update_codec_from_ffmpeg(self):
+    def update_codec_from_media_info(self):
+        from pymediainfo import MediaInfo
+
+        media_info = MediaInfo.parse(
+            self.raw_file_path, mediainfo_options={"File_TestContinuousFileNames": "0"}
+        )
+
+        self.is_faststart = all(
+            track.isstreamable == "Yes" for track in media_info.general_tracks
+        )
+        self.is_aac = all(track.format == "AAC" for track in media_info.audio_tracks)
+        self.is_h264 = all(
+            track.format in VIDEO_CODEC_SET for track in media_info.video_tracks
+        )
+        # TODO remove mov_text codec check
+        self.is_movtext = False
+
+    async def _update_codec_from_ffmpeg(self):
         cmd = [
             "ffprobe",
             "-v",
@@ -324,7 +341,7 @@ class MP4Processor(VideoProcessor):
         )
 
     async def prepare_codec_info(self):
-        await self.update_codec_from_ffmpeg()
+        self.update_codec_from_media_info()
 
     @property
     def transcoded_file_name(self):
@@ -340,7 +357,7 @@ class MaybeH264Processor(VideoProcessor):
         )
 
     async def prepare_codec_info(self):
-        await self.update_codec_from_ffmpeg()
+        self.update_codec_from_media_info()
         self.is_faststart = False
 
     @property
@@ -358,7 +375,7 @@ class MKVProcessor(VideoProcessor):
         )
 
     async def prepare_codec_info(self):
-        await self.update_codec_from_ffmpeg()
+        self.update_codec_from_media_info()
         self.is_faststart = False
 
     @property
@@ -376,7 +393,7 @@ class NeverH264Processor(VideoProcessor):
         )
 
     async def prepare_codec_info(self):
-        await self.update_codec_from_ffmpeg()
+        self.update_codec_from_media_info()
         self.is_faststart = False
 
     @property
