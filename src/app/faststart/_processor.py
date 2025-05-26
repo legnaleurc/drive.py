@@ -204,7 +204,7 @@ class VideoProcessor(object):
             if exit_code != 0:
                 _L.error("ffmpeg failed")
                 return True
-            media_info = await get_video_info(self.transcoded_file_path)
+            media_info = get_video_info(self.transcoded_file_path)
             _L.info(media_info)
 
             async with self._remote_context():
