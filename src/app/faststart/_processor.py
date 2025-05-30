@@ -84,7 +84,9 @@ class VideoProcessor(object):
         from pymediainfo import MediaInfo
 
         media_info = MediaInfo.parse(
-            self.raw_file_path, mediainfo_options={"File_TestContinuousFileNames": "0"}
+            self.raw_file_path,
+            mediainfo_options={"File_TestContinuousFileNames": "0"},
+            output=None,
         )
 
         self.is_faststart = all(
