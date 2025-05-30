@@ -122,7 +122,7 @@ async def _rename(drive: Drive, node: Node, new_name: str) -> None:
 async def _normalize_titles(name: str) -> AsyncIterator[tuple[str, str]]:
     async for product in generate_detailed_products(name):
         match product.sauce:
-            case "fanza" | "mgstage" | "fc2" | "heyzo":
+            case "fanza" | "mgstage" | "heyzo":
                 title = f"{product.id} {product.title}"
                 yield product.sauce, title
             case "carib" | "caribpr" | "1pondo" | "10musume":
