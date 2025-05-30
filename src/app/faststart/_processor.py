@@ -134,7 +134,7 @@ class VideoProcessor(object):
             _L.info("already cached, skip")
             return False
 
-        if not cache_only and not has_enough_quota(self.drive, self.node.size):
+        if not cache_only and not _has_enough_quota(self.drive, self.node.size):
             _L.info("not enough quota, skip")
             return False
 
@@ -173,7 +173,7 @@ class VideoProcessor(object):
             transcode_command = self._get_transcode_command()
             _L.info(" ".join(transcode_command))
 
-            exit_code = await shell_call(transcode_command, self.output_folder)
+            exit_code = await _shell_call(transcode_command, self.output_folder)
             if exit_code != 0:
                 _L.error("ffmpeg failed")
                 return True
@@ -198,7 +198,7 @@ class VideoProcessor(object):
     async def _delete_remote(self):
         _L.info(f"removing {self.node.name}")
         await self.drive.move(self.node, trashed=True)
-        await wait_for_sync(self.drive)
+        await _wait_for_sync(self.drive)
         _L.info(f"removed {self.node.name}")
 
     async def _download(self):
@@ -262,7 +262,7 @@ class VideoProcessor(object):
         await self.drive.move(self.node, new_name=f"__{self.node.name}")
         _L.debug("confirming rename")
         while True:
-            await wait_for_sync(self.drive)
+            await _wait_for_sync(self.drive)
             new_node = await self.drive.get_node_by_id(self.node.id)
             if new_node.name != self.node.name:
                 break
@@ -273,7 +273,7 @@ class VideoProcessor(object):
         await self.drive.move(self.node, new_name=self.node.name)
         _L.debug("confirming restore")
         while True:
-            await wait_for_sync(self.drive)
+            await _wait_for_sync(self.drive)
             new_node = await self.drive.get_node_by_id(self.node.id)
             if new_node.name == self.node.name:
                 break
@@ -358,15 +358,7 @@ class NeverH264Processor(VideoProcessor):
         return name + ".mp4"
 
 
-async def shell_pipe(cmd_list: list[str]):
-    p = await asyncio.create_subprocess_exec(
-        *cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    out, err = await p.communicate()
-    return out.decode("utf-8", "ignore"), err.decode("utf-8", "ignore")
-
-
-async def shell_call(cmd_list: list[str], folder: Path):
+async def _shell_call(cmd_list: list[str], folder: Path):
     with open(folder / "shell.log", "ab") as out:
         p = await asyncio.create_subprocess_exec(
             *cmd_list, stdout=out, stderr=subprocess.STDOUT
@@ -374,17 +366,17 @@ async def shell_call(cmd_list: list[str], folder: Path):
         return await p.wait()
 
 
-async def wait_for_sync(drive: Drive):
+async def _wait_for_sync(drive: Drive):
     async for change in drive.sync():
         _L.debug(change)
 
 
-def has_enough_quota(drive: Drive, size: int) -> bool:
+def _has_enough_quota(drive: Drive, size: int) -> bool:
     total = get_daily_usage(drive)
     return (total + size) < DAILY_UPLOAD_QUOTA
 
 
-PROCESSOR_TABLE: dict[str, type[VideoProcessor]] = {
+_PROCESSOR_TABLE: dict[str, type[VideoProcessor]] = {
     "video/mp4": MP4Processor,
     "video/x-matroska": MKVProcessor,
     "video/x-msvideo": MaybeH264Processor,
@@ -402,8 +394,8 @@ def create_processor(
     drive: Drive,
     node: Node,
 ) -> VideoProcessor | None:
-    if node.mime_type in PROCESSOR_TABLE:
-        constructor = PROCESSOR_TABLE[node.mime_type]
+    if node.mime_type in _PROCESSOR_TABLE:
+        constructor = _PROCESSOR_TABLE[node.mime_type]
         return constructor(
             work_folder=work_folder, dsn=dsn, pool=pool, drive=drive, node=node
         )
