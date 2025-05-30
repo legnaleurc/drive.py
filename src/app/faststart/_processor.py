@@ -1,5 +1,4 @@
 import asyncio
-import json
 import shutil
 import subprocess
 from concurrent.futures import Executor
@@ -41,7 +40,6 @@ class VideoProcessor(object):
         self.is_faststart = False
         self.is_h264 = False
         self.is_aac = False
-        self.is_movtext = False
 
     async def prepare_codec_info(self) -> None:
         raise NotImplementedError()
@@ -96,43 +94,6 @@ class VideoProcessor(object):
         self.is_h264 = all(
             track.format in VIDEO_CODEC_SET for track in media_info.video_tracks
         )
-        # TODO remove mov_text codec check
-        self.is_movtext = False
-
-    async def _update_codec_from_ffmpeg(self):
-        cmd = [
-            "ffprobe",
-            "-v",
-            "trace",
-            "-show_streams",
-            "-print_format",
-            "json",
-            "-i",
-            str(self.raw_file_path),
-        ]
-        out, err = await shell_pipe(cmd)
-        data = json.loads(out)
-        data = data["streams"]
-        audio_codec_list: list[str] = []
-        video_codec_list: list[str] = []
-        subtitle_codec_list: list[str] = []
-        for stream in data:
-            codec_type = stream["codec_type"]
-            if codec_type == "data":
-                continue
-            codec_name = stream["codec_name"]
-            if codec_type == "audio":
-                audio_codec_list.append(codec_name)
-            elif codec_type == "video":
-                attached_pic: int = stream["disposition"]["attached_pic"]
-                if attached_pic == 0:
-                    video_codec_list.append(codec_name)
-            elif codec_type == "subtitle":
-                subtitle_codec_list.append(codec_name)
-        self.is_aac = all(c == "aac" for c in audio_codec_list)
-        self.is_h264 = all(c in VIDEO_CODEC_SET for c in video_codec_list)
-        self.is_movtext = all(c == "mov_text" for c in subtitle_codec_list)
-        self.is_faststart = err.find("bytes read, 0 seeks") >= 0
 
     @property
     def is_skippable(self) -> bool:
