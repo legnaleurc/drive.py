@@ -2,7 +2,7 @@ RM := rm -rf
 PYTHON := uv run
 RUFF := $(PYTHON) ruff
 
-PKG_FILES := pyproject.toml hatch.toml
+PKG_FILES := pyproject.toml
 PKG_LOCK := uv.lock
 ENV_DIR := .venv
 ENV_LOCK := $(ENV_DIR)/pyvenv.cfg
