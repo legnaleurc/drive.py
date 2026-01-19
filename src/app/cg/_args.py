@@ -15,7 +15,7 @@ def parse_args(args: list[str]) -> Action:
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     analyze_parser = subparsers.add_parser("analyze", help="Analyze a given path")
-    analyze_parser.add_argument("path", required=True, help="Path to analyze")
+    analyze_parser.add_argument("path", help="Path to analyze")
 
     apply_parser = subparsers.add_parser(
         "apply", help="Apply sheet to stdout from stdin"
@@ -24,7 +24,7 @@ def parse_args(args: list[str]) -> Action:
     apply_parser.add_argument("--original", required=True, help="Path to original")
 
     debug_parser = subparsers.add_parser("debug", help="Debug name")
-    debug_parser.add_argument("name", required=True, help="File name")
+    debug_parser.add_argument("name", help="File name")
 
     kwargs = parser.parse_args(args)
     command: Literal["analyze", "generate", "debug"] = kwargs.command
