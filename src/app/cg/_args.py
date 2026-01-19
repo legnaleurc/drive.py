@@ -27,11 +27,11 @@ def parse_args(args: list[str]) -> Action:
     debug_parser.add_argument("name", help="File name")
 
     kwargs = parser.parse_args(args)
-    command: Literal["analyze", "generate", "debug"] = kwargs.command
+    command: Literal["analyze", "apply", "debug"] = kwargs.command
     match command:
         case "analyze":
             return lambda: analyze(PurePath(kwargs.path))
-        case "generate":
+        case "apply":
             return lambda: apply(
                 comic_path=PurePath(kwargs.comic),
                 original_path=PurePath(kwargs.original),
