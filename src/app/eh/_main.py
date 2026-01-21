@@ -21,7 +21,7 @@ async def _main(args: list[str]) -> int:
 
         analyzed = ((_, analyze(_.name)) for _ in children if not _.is_trashed)
         sorted_ = sorted(
-            ((_, data) for _, data in analyzed if data), key=lambda _: _[1].item_id
+            ((_, data) for _, data in analyzed if data), key=lambda _: -1 * _[1].item_id
         )
         crawled = ((_, await crawl(data)) for _, data in sorted_)
         async for node, data in crawled:
