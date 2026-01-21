@@ -17,7 +17,7 @@ async def crawl(analyzed: AnalyzedData) -> list[CrawledData]:
     return [
         CrawledData(title=title.strip(), url=urljoin(_HOST, href))
         for title, href in pairs
-        if isinstance(title, str) and isinstance(href, str)
+        if isinstance(title, str) and isinstance(href, str) and _is_allowed(title)
     ]
 
 
@@ -36,3 +36,9 @@ async def _get_from_nyaa(text: str) -> BeautifulSoup:
         response.raise_for_status()
         html = await response.text(errors="ignore")
     return BeautifulSoup(html, "html.parser")
+
+
+def _is_allowed(title: str) -> bool:
+    if title.find("zhonyk") >= 0:
+        return False
+    return True
