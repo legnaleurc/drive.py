@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class AnalyzedData:
     author: str
     title: str
+    item_id: int
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -20,7 +20,10 @@ async def _main(args: list[str]) -> int:
         children = await drive.get_children(parent)
 
         analyzed = ((_, analyze(_.name)) for _ in children if not _.is_trashed)
-        crawled = ((_, await crawl(data)) for _, data in analyzed if data is not None)
+        sorted_ = sorted(
+            ((_, data) for _, data in analyzed if data), key=lambda _: _[1].item_id
+        )
+        crawled = ((_, await crawl(data)) for _, data in sorted_)
         async for node, data in crawled:
             if not data:
                 continue

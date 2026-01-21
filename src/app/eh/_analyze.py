@@ -11,8 +11,10 @@ def analyze(name: str) -> AnalyzedData | None:
     author = rv.group(1)
     title = rv.group(2).replace("[DL版]", "").strip()
     title = re.sub(r"\([^()]+\)$", "", title).strip()
+    item_id = int(rv.group(3))
 
     return AnalyzedData(
         author=author,
         title=title,
+        item_id=item_id,
     )
