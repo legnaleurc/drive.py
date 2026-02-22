@@ -3,7 +3,7 @@ from contextlib import closing, contextmanager
 from logging import getLogger
 from pathlib import Path
 
-from wcpan.drive.core.types import Node
+from ._types import FileItem
 
 
 _L = getLogger(__name__)
@@ -31,13 +31,13 @@ def initialize_cache(dsn: Path):
             _L.exception("cache initialize failed")
 
 
-def is_migrated(dsn: Path, node: Node):
+def is_migrated(dsn: Path, item: FileItem):
     with migration_cache(dsn) as query:
         query.execute(
             """
             SELECT id FROM migrated WHERE node_id = ? AND is_muxed = 1 AND is_coded = 1;
             """,
-            (node.id,),
+            (item.id,),
         )
         row = query.fetchone()
         if not row:
@@ -45,13 +45,13 @@ def is_migrated(dsn: Path, node: Node):
         return True
 
 
-def has_cache(dsn: Path, node: Node):
+def has_cache(dsn: Path, item: FileItem):
     with migration_cache(dsn) as query:
         query.execute(
             """
             SELECT id FROM migrated WHERE node_id = ?;
             """,
-            (node.id,),
+            (item.id,),
         )
         row = query.fetchone()
         if not row:
@@ -59,13 +59,13 @@ def has_cache(dsn: Path, node: Node):
         return True
 
 
-def need_transcode(dsn: Path, node: Node):
+def need_transcode(dsn: Path, item: FileItem):
     with migration_cache(dsn) as query:
         query.execute(
             """
             SELECT id FROM migrated WHERE node_id = ? AND is_coded = 0;
             """,
-            (node.id,),
+            (item.id,),
         )
         row = query.fetchone()
         if not row:
@@ -73,13 +73,13 @@ def need_transcode(dsn: Path, node: Node):
         return True
 
 
-def set_cache(dsn: Path, node: Node, is_muxed: bool, is_coded: bool):
+def set_cache(dsn: Path, item: FileItem, is_muxed: bool, is_coded: bool):
     with migration_cache(dsn) as query:
         query.execute(
             """
             SELECT is_muxed, is_coded FROM migrated WHERE node_id = ?;
             """,
-            (node.id,),
+            (item.id,),
         )
         row = query.fetchone()
         if not row:
@@ -87,24 +87,24 @@ def set_cache(dsn: Path, node: Node, is_muxed: bool, is_coded: bool):
                 """
                 INSERT INTO migrated (node_id, is_muxed, is_coded) VALUES (?, ?, ?);
                 """,
-                (node.id, is_muxed, is_coded),
+                (item.id, is_muxed, is_coded),
             )
             return
         query.execute(
             """
             UPDATE migrated SET is_muxed = ?, is_coded = ? WHERE node_id = ?;
             """,
-            (is_muxed, is_coded, node.id),
+            (is_muxed, is_coded, item.id),
         )
 
 
-def unset_cache(dsn: Path, node: Node):
+def unset_cache(dsn: Path, item: FileItem):
     with migration_cache(dsn) as query:
         query.execute(
             """
             DELETE FROM migrated WHERE node_id = ?;
             """,
-            (node.id,),
+            (item.id,),
         )
 
 
