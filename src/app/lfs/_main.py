@@ -25,9 +25,10 @@ def _parse_args(args: list[str]) -> Callable[[], Awaitable[None]]:
     analyze_parser = subparsers.add_parser("analyze", help="Analyze a given path")
     analyze_parser.add_argument("path", help="Path to analyze")
 
-    _generate_parser = subparsers.add_parser(
+    generate_parser = subparsers.add_parser(
         "generate", help="Generate script to stdout from stdin"
     )
+    generate_parser.add_argument("--output", help="Output root directory")
 
     kwargs = parser.parse_args(args)
     command: Literal["analyze", "generate"] = kwargs.command
@@ -36,4 +37,6 @@ def _parse_args(args: list[str]) -> Callable[[], Awaitable[None]]:
             path: str = kwargs.path
             return lambda: analyze(Path(path))
         case "generate":
-            return lambda: generate()
+            return lambda: generate(
+                output_dir=Path(kwargs.output) if kwargs.output else None
+            )

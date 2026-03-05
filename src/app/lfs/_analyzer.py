@@ -1,33 +1,28 @@
 import sys
 from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
 
 import magic
 import yaml
+from pymediainfo import MediaInfo
 
-from ._types import MediaContainer, MediaDescriptor
-
-
-_VIDEO_CODEC_SET: set[str] = {"h264", "hevc"}
+from ._types import AudioStream, MediaContainer, MediaDescriptor, SubtitleStream
 
 
 async def analyze(root_path: Path) -> None:
+    files: list[MediaDescriptor] = []
     for file_path in _scan(root_path):
-        descriptor = await _describe(file_path)
-        meta = _transform(descriptor)
+        meta = _transform(file_path)
+        files.append({"path": str(file_path), "drop_title": False, "meta": meta})
 
-        data: MediaDescriptor = {
-            "path": str(file_path),
-            "meta": meta,
-        }
-        yaml.safe_dump(
-            [data],
-            sys.stdout,
-            encoding="utf-8",
-            allow_unicode=True,
-            default_flow_style=False,
-        )
+    data = {"root": str(root_path), "files": files}
+    yaml.safe_dump(
+        data,
+        sys.stdout,
+        encoding="utf-8",
+        allow_unicode=True,
+        default_flow_style=False,
+    )
 
 
 def _scan(root_path: Path) -> Iterator[Path]:
@@ -41,54 +36,55 @@ def _scan(root_path: Path) -> Iterator[Path]:
             yield file_path
 
 
-def _is_video(file_path: Path):
+def _is_video(file_path: Path) -> bool:
     mime_type = magic.from_file(file_path, mime=True)  # type: ignore
     return mime_type.startswith("video/")
 
 
-async def _describe(file_path: Path) -> Any:
-    from asyncio import create_subprocess_exec
-    from asyncio.subprocess import PIPE
-    from json import loads
+def _get_tags(track) -> dict | None:
+    language = getattr(track, "language", None)
+    if language is None:
+        return None
+    return {"language": language}
 
-    cmd = [
-        "ffprobe",
-        "-v",
-        "quiet",
-        "-show_streams",
-        "-print_format",
-        "json",
-        "-i",
-        str(file_path),
+
+def _transform(file_path: Path) -> MediaContainer:
+    media_info = MediaInfo.parse(
+        file_path,
+        mediainfo_options={"File_TestContinuousFileNames": "0"},
+        output=None,
+    )
+
+    general = media_info.general_tracks[0]
+    is_mp4 = general.format == "MPEG-4"
+    is_faststart = general.isstreamable == "Yes"
+    title = getattr(general, "title", None)
+
+    video_codec = media_info.video_tracks[0].format if media_info.video_tracks else ""
+
+    audios: list[AudioStream] = [
+        {
+            "index": i,
+            "is_aac": t.format == "AAC",
+            "enabled": True,
+            "tags": _get_tags(t),
+        }
+        for i, t in enumerate(media_info.audio_tracks)
     ]
-    p = await create_subprocess_exec(*cmd, stdout=PIPE, stderr=PIPE)
-    out, _ = await p.communicate()
-    raw_out = out.decode("utf-8", "ignore")
-    descriptor = loads(raw_out)
-    return descriptor
+    subtitles: list[SubtitleStream] = [
+        {
+            "index": i,
+            "enabled": False,
+            "tags": _get_tags(t),
+        }
+        for i, t in enumerate(media_info.text_tracks)
+    ]
 
-
-def _transform(descriptor: dict[str, Any]) -> MediaContainer:
-    rv: MediaContainer = {
-        "is_h264": False,
-        "audios": [],
+    return {
+        "video_codec": video_codec,
+        "is_mp4": is_mp4,
+        "is_faststart": is_faststart,
+        "title": title,
+        "audios": audios,
+        "subtitles": subtitles,
     }
-    streams: list[Any] = descriptor["streams"]
-    for stream in streams:
-        codec_type: str = stream["codec_type"]
-        match codec_type:
-            case "video":
-                codec_name: str = stream["codec_name"]
-                rv["is_h264"] = codec_name in _VIDEO_CODEC_SET
-            case "audio":
-                codec_name: str = stream["codec_name"]
-                rv["audios"].append(
-                    {
-                        "index": len(rv["audios"]),
-                        "is_aac": codec_name == "aac",
-                        "tags": stream.get("tags", None),
-                    }
-                )
-            case _:
-                continue
-    return rv
