@@ -29,6 +29,7 @@ purge: clean
 
 test: venv
 	$(PYTHON) -m compileall $(MODULE_LIST)
+	$(PYTHON) -m unittest
 
 venv: $(ENV_LOCK)
 
