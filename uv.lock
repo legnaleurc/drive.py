@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.12, <4.0"
 
 [[package]]
@@ -122,7 +122,7 @@ requires-dist = [
     { name = "wcpan-drive-crypt", specifier = ">=4.1.1,<5.0.0" },
     { name = "wcpan-drive-google", specifier = ">=9.1.7,<10.0.0" },
     { name = "wcpan-drive-sqlite", specifier = ">=2.1.0,<3.0.0" },
-    { name = "wcpan-jav", specifier = ">=0.2.4,<0.3.0" },
+    { name = "wcpan-jav", specifier = ">=0.2.5,<0.3.0" },
     { name = "wcpan-logging", specifier = ">=2.1.0,<3.0.0" },
 ]
 
@@ -430,15 +430,15 @@ wheels = [
 
 [[package]]
 name = "wcpan-jav"
-version = "0.2.4"
+version = "0.2.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "beautifulsoup4" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/33/60/7ac39599fbf8c0a0fac2ef01c0e8a39a3d81185fae46964f58a71530065c/wcpan_jav-0.2.4.tar.gz", hash = "sha256:d72f13c0c07e1b44dbc0db2fbce2d6ff6c7d86dc1c8b99f2acaf852807b58495", size = 24244, upload-time = "2025-04-10T14:08:25.987Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/de/f9/adbf29d0f6c8e66a342c022568a09b9b48448ef982dfd3af62dfb00c3c09/wcpan_jav-0.2.5.tar.gz", hash = "sha256:71f571ede6f434b19fe492fc922b31eab9833efe38ceee10d570ee74ea0e636b", size = 27270, upload-time = "2026-03-08T07:35:32.35Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c0/ff/8e295b9ddfcf275feb7cac4b2e64ad62b6e28f26ab1bbf75177b8e20c905/wcpan_jav-0.2.4-py3-none-any.whl", hash = "sha256:dc28db9bfe74807ee9ee91002f3dfc3f2cf45d28f7ebb3ec4c538ffc200732af", size = 14761, upload-time = "2025-04-10T14:08:24.559Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/19/183030274e0d8be740da74394dad18cd73308cc475790b285ccd81508cc2/wcpan_jav-0.2.5-py3-none-any.whl", hash = "sha256:067fb1092318d578df0856b335af96ea2580d4b9a24c499d86bba9f683ba3e41", size = 14874, upload-time = "2026-03-08T07:35:33.581Z" },
 ]
 
 [[package]]

@@ -14,7 +14,7 @@ dependencies = [
     "wcpan-drive-crypt>=4.1.1,<5.0.0",
     "wcpan-drive-google>=9.1.7,<10.0.0",
     "wcpan-drive-sqlite>=2.1.0,<3.0.0",
-    "wcpan-jav>=0.2.4,<0.3.0",
+    "wcpan-jav>=0.2.5,<0.3.0",
     "wcpan-logging>=2.1.0,<3.0.0",
 ]
 
