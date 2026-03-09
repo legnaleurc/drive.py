@@ -4,18 +4,18 @@ from pathlib import Path
 
 import magic
 import yaml
-from pymediainfo import MediaInfo
+from pymediainfo import MediaInfo, Track
 
 from ._types import AudioStream, MediaContainer, MediaDescriptor, SubtitleStream
 
 
-async def analyze(root_path: Path) -> None:
+async def scan(root_path: Path) -> None:
     files: list[MediaDescriptor] = []
-    for file_path in _scan(root_path):
+    for file_path in _walk(root_path):
         meta = _transform(file_path)
         files.append({"path": str(file_path), "drop_title": False, "meta": meta})
 
-    data = {"root": str(root_path), "files": files}
+    data: dict[str, object] = {"root": str(root_path), "files": files}
     yaml.safe_dump(
         data,
         sys.stdout,
@@ -25,7 +25,7 @@ async def analyze(root_path: Path) -> None:
     )
 
 
-def _scan(root_path: Path) -> Iterator[Path]:
+def _walk(root_path: Path) -> Iterator[Path]:
     for root, _, files in root_path.walk():
         for file_ in files:
             file_path = root / file_
@@ -41,7 +41,7 @@ def _is_video(file_path: Path) -> bool:
     return mime_type.startswith("video/")
 
 
-def _get_tags(track) -> dict | None:
+def _get_tags(track: Track) -> dict[str, object] | None:
     language = getattr(track, "language", None)
     if language is None:
         return None

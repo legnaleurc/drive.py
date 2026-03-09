@@ -4,8 +4,8 @@ from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Literal
 
-from ._analyzer import analyze
-from ._generator import generate
+from ._scanner import scan
+from ._scripter import script
 
 
 async def main(args: list[str]) -> int:
@@ -22,21 +22,21 @@ def _parse_args(args: list[str]) -> Callable[[], Awaitable[None]]:
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    analyze_parser = subparsers.add_parser("analyze", help="Analyze a given path")
-    analyze_parser.add_argument("path", help="Path to analyze")
+    scan_parser = subparsers.add_parser("scan", help="Scan a given path")
+    scan_parser.add_argument("path", help="Path to scan")
 
-    generate_parser = subparsers.add_parser(
-        "generate", help="Generate script to stdout from stdin"
+    script_parser = subparsers.add_parser(
+        "script", help="Generate script to stdout from stdin"
     )
-    generate_parser.add_argument("--output", help="Output root directory")
+    script_parser.add_argument("--output", help="Output root directory")
 
     kwargs = parser.parse_args(args)
-    command: Literal["analyze", "generate"] = kwargs.command
+    command: Literal["scan", "script"] = kwargs.command
     match command:
-        case "analyze":
+        case "scan":
             path: str = kwargs.path
-            return lambda: analyze(Path(path))
-        case "generate":
-            return lambda: generate(
+            return lambda: scan(Path(path))
+        case "script":
+            return lambda: script(
                 output_dir=Path(kwargs.output) if kwargs.output else None
             )

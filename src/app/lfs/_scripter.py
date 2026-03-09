@@ -13,7 +13,7 @@ MP4_FLAGS = "+faststart"
 VIDEO_CODEC_SET = {"AVC", "HEVC"}
 
 
-async def generate(output_dir: Path | None = None) -> None:
+async def script(output_dir: Path | None = None) -> None:
     data = yaml.safe_load(sys.stdin)
     root = data["root"]
     files: list[MediaDescriptor] = data["files"]
