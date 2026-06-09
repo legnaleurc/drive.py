@@ -22,7 +22,7 @@ async def script(output_dir: Path | None = None) -> None:
         src = file_data["path"]
         drop_title = file_data["drop_title"]
         meta = file_data["meta"]
-        copy = (
+        move = (
             meta["video_codec"] in VIDEO_CODEC_SET
             and meta["is_mp4"]
             and meta["is_faststart"]
@@ -40,9 +40,9 @@ async def script(output_dir: Path | None = None) -> None:
 
         mkdir_cmd = f"mkdir -p {shlex.quote(str(dst.parent))}"
 
-        if copy:
+        if move:
             print(mkdir_cmd)
-            print(shlex.join(["cp", src, str(dst)]))
+            print(shlex.join(["mv", src, str(dst)]))
         else:
             print(mkdir_cmd)
             cmd = _build_ffmpeg_cmd(src, str(dst), meta, drop_title)
