@@ -4,3 +4,6 @@
 
 # Editors
 .vscode
+
+# Local worktrees
+.worktrees/
