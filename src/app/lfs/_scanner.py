@@ -13,7 +13,13 @@ async def scan(root_path: Path) -> None:
     files: list[MediaDescriptor] = []
     for file_path in _walk(root_path):
         meta = _transform(file_path)
-        files.append({"path": str(file_path), "drop_title": False, "meta": meta})
+        files.append(
+            {
+                "path": str(file_path),
+                "drop_title": meta["title"] is not None,
+                "meta": meta,
+            }
+        )
 
     data: dict[str, object] = {"root": str(root_path), "files": files}
     yaml.safe_dump(
@@ -30,10 +36,14 @@ def _walk(root_path: Path) -> Iterator[Path]:
         for file_ in files:
             file_path = root / file_
 
-            if not _is_video(file_path):
+            if _is_generated_file(file_path) or not _is_video(file_path):
                 continue
 
             yield file_path
+
+
+def _is_generated_file(file_path: Path) -> bool:
+    return file_path.stem.endswith(".old") or file_path.name.endswith(".tmp.mp4")
 
 
 def _is_video(file_path: Path) -> bool:

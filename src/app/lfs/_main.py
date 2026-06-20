@@ -4,6 +4,7 @@ from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Literal
 
+from ._cleanup import cleanup
 from ._scanner import scan
 from ._scripter import script
 
@@ -25,18 +26,17 @@ def _parse_args(args: list[str]) -> Callable[[], Awaitable[None]]:
     scan_parser = subparsers.add_parser("scan", help="Scan a given path")
     scan_parser.add_argument("path", help="Path to scan")
 
-    script_parser = subparsers.add_parser(
-        "script", help="Generate script to stdout from stdin"
-    )
-    script_parser.add_argument("--output", help="Output root directory")
+    subparsers.add_parser("script", help="Generate script to stdout from stdin")
+
+    subparsers.add_parser("cleanup", help="Remove old files from stdin manifest")
 
     kwargs = parser.parse_args(args)
-    command: Literal["scan", "script"] = kwargs.command
+    command: Literal["scan", "script", "cleanup"] = kwargs.command
     match command:
         case "scan":
             path: str = kwargs.path
             return lambda: scan(Path(path))
         case "script":
-            return lambda: script(
-                output_dir=Path(kwargs.output) if kwargs.output else None
-            )
+            return lambda: script()
+        case "cleanup":
+            return lambda: cleanup()

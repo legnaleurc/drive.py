@@ -4,67 +4,95 @@ from pathlib import Path
 
 import yaml
 
+from ._operations import VIDEO_CODEC_SET, get_operation_paths, needs_processing
 from ._types import AudioStream, MediaDescriptor, SubtitleStream
 
 
 H264_PRESET = "veryslow"
 H264_CRF = "18"
 MP4_FLAGS = "+faststart"
-VIDEO_CODEC_SET = {"AVC", "HEVC"}
+
+TRANSCODE_FUNCTION_TEMPLATE = """\
+transcode() {
+    src=$1
+    tmp=$2
+    old=$3
+    final=$4
+    shift 4
+
+    if [ -e "$old" ] && [ -e "$final" ]; then
+        if { [ "$src" = "$final" ] || [ ! -e "$src" ]; } && [ ! -e "$tmp" ]; then
+            return 0
+        fi
+        echo "inconsistent transcode state: $src" >&2
+        return 1
+    fi
+
+    if [ -e "$old" ] && [ -e "$tmp" ]; then
+        if [ ! -e "$src" ] && [ ! -e "$final" ]; then
+            mv -- "$tmp" "$final"
+            return 0
+        fi
+        echo "inconsistent transcode state: $src" >&2
+        return 1
+    fi
+
+    if [ -e "$old" ] || { [ "$src" != "$final" ] && [ -e "$final" ]; }; then
+        echo "inconsistent transcode state: $src" >&2
+        return 1
+    fi
+
+    if [ ! -e "$src" ]; then
+        echo "inconsistent transcode state: $src" >&2
+        return 1
+    fi
+
+    ffmpeg -nostdin -y -i "$src" "$@" -movflags @MP4_FLAGS@ "$tmp"
+    mv -- "$src" "$old"
+    mv -- "$tmp" "$final"
+}
+"""
 
 
-async def script(output_dir: Path | None = None) -> None:
+async def script() -> None:
     data = yaml.safe_load(sys.stdin)
-    root = data["root"]
     files: list[MediaDescriptor] = data["files"]
+    files = [file_data for file_data in files if needs_processing(file_data)]
 
-    for file_data in files:
-        src = file_data["path"]
-        drop_title = file_data["drop_title"]
-        meta = file_data["meta"]
-        move = (
-            meta["video_codec"] in VIDEO_CODEC_SET
-            and meta["is_mp4"]
-            and meta["is_faststart"]
-            and all(a["is_aac"] for a in meta["audios"])
-            and all(a["enabled"] for a in meta["audios"])
-            and not any(s["enabled"] for s in meta["subtitles"])
-            and not drop_title
+    print("set -e")
+    if not files:
+        return
+
+    print()
+    print(
+        TRANSCODE_FUNCTION_TEMPLATE.replace(
+            "@MP4_FLAGS@", shlex.quote(MP4_FLAGS)
         )
-
-        if output_dir is not None:
-            dst = output_dir / Path(src).relative_to(root)
-            dst = dst.with_suffix(".mp4")
-        else:
-            dst = Path(src).with_suffix(".mp4")
-
-        mkdir_cmd = f"mkdir -p {shlex.quote(str(dst.parent))}"
-
-        if move:
-            print(mkdir_cmd)
-            print(shlex.join(["mv", src, str(dst)]))
-        else:
-            print(mkdir_cmd)
-            cmd = _build_ffmpeg_cmd(src, str(dst), meta, drop_title)
-            print(shlex.join(cmd))
+    )
+    for file_data in files:
+        paths = get_operation_paths(Path(file_data["path"]))
+        cmd = [
+            "transcode",
+            str(paths.source),
+            str(paths.temporary),
+            str(paths.backup),
+            str(paths.final),
+            *_build_ffmpeg_options(file_data["meta"], file_data["drop_title"]),
+        ]
+        print(shlex.join(cmd))
 
 
-def _build_ffmpeg_cmd(src: str, dst: str, meta: dict, drop_title: bool) -> list[str]:
+def _build_ffmpeg_options(meta: dict, drop_title: bool) -> list[str]:
     video_codec = meta["video_codec"]
     audios: list[AudioStream] = meta["audios"]
     subtitles: list[SubtitleStream] = meta["subtitles"]
 
-    main_cmd = ["ffmpeg", "-nostdin", "-y"]
-    src_cmd = ["-i", src]
     video_cmd = _get_video_cmd(video_codec)
     audio_cmd = _get_audio_cmd(audios)
     subtitle_cmd = _get_subtitle_cmd(subtitles)
     title_cmd = _get_title_cmd(drop_title)
-    dst_cmd = ["-movflags", MP4_FLAGS, dst]
 
-    return (
-        main_cmd + src_cmd + video_cmd + audio_cmd + subtitle_cmd + title_cmd + dst_cmd
-    )
+    return video_cmd + audio_cmd + subtitle_cmd + title_cmd
 
 
 def _get_video_cmd(video_codec: str) -> list[str]:
