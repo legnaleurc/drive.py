@@ -11,9 +11,9 @@ from unittest.mock import patch
 
 import yaml
 
-from app.lfs._main import _parse_args, main
-from app.lfs._scanner import _walk, scan
-from app.lfs._scripter import script
+from app.faststart._main import _parse_args, main
+from app.faststart._scanner import _walk, scan
+from app.faststart._scripter import script
 
 
 def _file(path: str, *, compliant: bool = False) -> dict:
@@ -59,7 +59,9 @@ def _run_main(args: list[str], data: dict) -> tuple[int, str, str]:
     return result, stdout.getvalue(), stderr.getvalue()
 
 
-def _run_generated_script(data: dict, *, path: Path | None = None) -> subprocess.CompletedProcess:
+def _run_generated_script(
+    data: dict, *, path: Path | None = None
+) -> subprocess.CompletedProcess:
     env = os.environ.copy()
     if path is not None:
         env["PATH"] = f"{path}:{env['PATH']}"
@@ -78,8 +80,8 @@ def _write_fake_ffmpeg(directory: Path) -> Path:
     executable.write_text(
         "#!/bin/sh\n"
         "for output do :; done\n"
-        "printf '%s' \"${FFMPEG_OUTPUT:-transcoded}\" > \"$output\"\n"
-        "test \"${FFMPEG_FAIL:-0}\" != 1\n"
+        'printf \'%s\' "${FFMPEG_OUTPUT:-transcoded}" > "$output"\n'
+        'test "${FFMPEG_FAIL:-0}" != 1\n'
     )
     executable.chmod(0o755)
     return executable
@@ -161,7 +163,9 @@ class TestScript(unittest.TestCase):
             _write_fake_ffmpeg(root)
             data = _manifest(_file(str(source)))
 
-            with patch.dict(os.environ, {"FFMPEG_FAIL": "1", "FFMPEG_OUTPUT": "broken"}):
+            with patch.dict(
+                os.environ, {"FFMPEG_FAIL": "1", "FFMPEG_OUTPUT": "broken"}
+            ):
                 failed = _run_generated_script(data, path=root)
 
             self.assertNotEqual(failed.returncode, 0)
@@ -205,8 +209,8 @@ class TestScan(unittest.TestCase):
                 stdout = io.StringIO()
 
                 with (
-                    patch("app.lfs._scanner._walk", return_value=iter([path])),
-                    patch("app.lfs._scanner._transform", return_value=meta),
+                    patch("app.faststart._scanner._walk", return_value=iter([path])),
+                    patch("app.faststart._scanner._transform", return_value=meta),
                     redirect_stdout(stdout),
                 ):
                     asyncio.run(scan(Path("/media")))
@@ -224,7 +228,9 @@ class TestScan(unittest.TestCase):
             backup.touch()
             temporary.touch()
 
-            with patch("app.lfs._scanner._is_video", return_value=True) as is_video:
+            with patch(
+                "app.faststart._scanner._is_video", return_value=True
+            ) as is_video:
                 files = list(_walk(root))
 
             self.assertEqual(files, [video])

@@ -64,11 +64,7 @@ async def script() -> None:
         return
 
     print()
-    print(
-        TRANSCODE_FUNCTION_TEMPLATE.replace(
-            "@MP4_FLAGS@", shlex.quote(MP4_FLAGS)
-        )
-    )
+    print(TRANSCODE_FUNCTION_TEMPLATE.replace("@MP4_FLAGS@", shlex.quote(MP4_FLAGS)))
     for file_data in files:
         paths = get_operation_paths(Path(file_data["path"]))
         cmd = [
